@@ -1,8 +1,3 @@
-"""
-Phone Number Validator Web App
-Flask application for validating phone numbers using multiple APIs
-"""
-
 from flask import Flask
 from flask_wtf.csrf import CSRFProtect
 import os

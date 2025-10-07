@@ -1,7 +1,3 @@
-"""
-Flask routes for phone number validation
-"""
-
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file, jsonify
 from werkzeug.utils import secure_filename
 import os
@@ -118,6 +114,11 @@ def api_validate(phone_number):
 @main.route('/test')
 def test():
     """Test route to verify the app is working"""
+    return jsonify({
+        'status': 'success',
+        'message': 'App is running correctly',
+        'csrf_enabled': True
+    })
     from flask_wtf.csrf import generate_csrf
     return jsonify({
         'status': 'success',
