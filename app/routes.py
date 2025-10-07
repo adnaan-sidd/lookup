@@ -25,6 +25,15 @@ def index():
         logger.info(f"POST request received. Form data: {request.form}")
         logger.info(f"Form errors: {form.errors}")
         logger.info(f"Form validate_on_submit: {form.validate_on_submit()}")
+        
+        # Handle CSRF token manually if needed
+        if not form.validate_on_submit():
+            if 'csrf_token' in form.errors:
+                flash('CSRF token error. Please try again.', 'error')
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        flash(f'{field}: {error}', 'error')
     
     if form.validate_on_submit():
         phone_number = form.phone_number.data.strip()
@@ -43,6 +52,16 @@ def bulk():
     """Bulk validation page with CSV upload"""
     form = BulkUploadForm()
     results = None
+    
+    if request.method == 'POST':
+        # Handle CSRF token manually if needed
+        if not form.validate_on_submit():
+            if 'csrf_token' in form.errors:
+                flash('CSRF token error. Please try again.', 'error')
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        flash(f'{field}: {error}', 'error')
     
     if form.validate_on_submit():
         try:
@@ -95,8 +114,18 @@ def api_validate(phone_number):
 @main.route('/test')
 def test():
     """Test route to verify the app is working"""
+    from flask_wtf.csrf import generate_csrf
     return jsonify({
         'status': 'success',
         'message': 'App is running correctly',
-        'csrf_enabled': True
+        'csrf_enabled': True,
+        'csrf_token': generate_csrf()
+    })
+
+@main.route('/csrf-token')
+def csrf_token():
+    """Get CSRF token for debugging"""
+    from flask_wtf.csrf import generate_csrf
+    return jsonify({
+        'csrf_token': generate_csrf()
     })
