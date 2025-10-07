@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Single Number Validation - Phone Validator{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-search me-2"></i>Single Phone Number Validation
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.phone_number.label(class="form-label") }}
+                        {{ form.phone_number(class="form-control form-control-lg") }}
+                        {% if form.phone_number.errors %}
+                            <div class="text-danger">
+                                {% for error in form.phone_number.errors %}
+                                    <small>{{ error }}</small><br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Enter a phone number with country code (e.g., +1234567890, +44123456789)
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if result %}
+        <div class="card shadow mt-4">
+            <div class="card-header bg-success text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-check-circle me-2"></i>Validation Results
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Basic Information</h5>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Original Number:</strong></td>
+                                <td>{{ result.original_number }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Formatted Number:</strong></td>
+                                <td>{{ result.formatted_number or 'N/A' }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Country:</strong></td>
+                                <td>{{ result.country or 'N/A' }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Validation Status</h5>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>libphonenumber:</strong></td>
+                                <td>
+                                    {% if result.valid_lib %}
+                                        <span class="badge bg-success">Valid</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Invalid</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>NumVerify API:</strong></td>
+                                <td>
+                                    {% if result.valid_numverify %}
+                                        <span class="badge bg-success">Valid</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Unknown</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                {% if result.carrier or result.location %}
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h5>Carrier Information</h5>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Carrier:</strong></td>
+                                <td>{{ result.carrier or 'N/A' }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Location:</strong></td>
+                                <td>{{ result.location or 'N/A' }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Additional Info</h5>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Line Type:</strong></td>
+                                <td>{{ result.line_type or 'N/A' }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Fraud Risk:</strong></td>
+                                <td>
+                                    {% if result.fraud_risk %}
+                                        <span class="badge bg-{{ 'danger' if result.fraud_risk == 'High' else 'warning' if result.fraud_risk == 'Medium' else 'success' }}">
+                                            {{ result.fraud_risk }}
+                                        </span>
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Disposable:</strong></td>
+                                <td>
+                                    {% if result.disposable is not none %}
+                                        <span class="badge bg-{{ 'warning' if result.disposable else 'success' }}">
+                                            {{ 'Yes' if result.disposable else 'No' }}
+                                        </span>
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if result.errors %}
+                <div class="alert alert-warning mt-3">
+                    <h6><i class="fas fa-exclamation-triangle me-1"></i>Warnings/Errors:</h6>
+                    <ul class="mb-0">
+                        {% for error in result.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
