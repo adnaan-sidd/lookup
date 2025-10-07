@@ -1,8 +1,3 @@
-"""
-Phone Number Validator Web App
-Flask application for validating phone numbers using multiple APIs
-"""
-
 from flask import Flask
 from flask_wtf.csrf import CSRFProtect
 import os
@@ -18,6 +13,7 @@ def create_app():
     # Configuration
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+    app.config['WTF_CSRF_ENABLED'] = True
     
     # Initialize CSRF protection
     CSRFProtect(app)
