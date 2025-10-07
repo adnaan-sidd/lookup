@@ -15,14 +15,20 @@ logger = logging.getLogger(__name__)
 # Create blueprint
 main = Blueprint('main', __name__)
 
-@main.route('/')
+@main.route('/', methods=['GET', 'POST'])
 def index():
     """Home page with single number validation form"""
     form = SingleNumberForm()
     result = None
     
+    if request.method == 'POST':
+        logger.info(f"POST request received. Form data: {request.form}")
+        logger.info(f"Form errors: {form.errors}")
+        logger.info(f"Form validate_on_submit: {form.validate_on_submit()}")
+    
     if form.validate_on_submit():
         phone_number = form.phone_number.data.strip()
+        logger.info(f"Validating phone number: {phone_number}")
         try:
             result = validate_number(phone_number)
             flash('Number validation completed!', 'success')
@@ -32,7 +38,7 @@ def index():
     
     return render_template('index.html', form=form, result=result)
 
-@main.route('/bulk')
+@main.route('/bulk', methods=['GET', 'POST'])
 def bulk():
     """Bulk validation page with CSV upload"""
     form = BulkUploadForm()
@@ -85,3 +91,12 @@ def api_validate(phone_number):
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@main.route('/test')
+def test():
+    """Test route to verify the app is working"""
+    return jsonify({
+        'status': 'success',
+        'message': 'App is running correctly',
+        'csrf_enabled': True
+    })
