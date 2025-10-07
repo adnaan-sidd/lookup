@@ -25,15 +25,19 @@ def index():
         logger.info(f"POST request received. Form data: {request.form}")
         logger.info(f"Form errors: {form.errors}")
         logger.info(f"Form validate_on_submit: {form.validate_on_submit()}")
+        logger.info(f"CSRF token in form: {form.csrf_token.data if hasattr(form, 'csrf_token') else 'No CSRF token field'}")
+        logger.info(f"Request CSRF token: {request.form.get('csrf_token', 'No CSRF token in request')}")
         
         # Handle CSRF token manually if needed
         if not form.validate_on_submit():
             if 'csrf_token' in form.errors:
                 flash('CSRF token error. Please try again.', 'error')
+                logger.error(f"CSRF token validation failed: {form.errors['csrf_token']}")
             else:
                 for field, errors in form.errors.items():
                     for error in errors:
                         flash(f'{field}: {error}', 'error')
+                        logger.error(f"Form validation error - {field}: {error}")
     
     if form.validate_on_submit():
         phone_number = form.phone_number.data.strip()
@@ -129,3 +133,33 @@ def csrf_token():
     return jsonify({
         'csrf_token': generate_csrf()
     })
+
+@main.route('/test-form', methods=['GET', 'POST'])
+def test_form():
+    """Test form without CSRF for debugging"""
+    if request.method == 'POST':
+        phone_number = request.form.get('phone_number', '').strip()
+        if phone_number:
+            try:
+                result = validate_number(phone_number)
+                return jsonify({
+                    'status': 'success',
+                    'result': result
+                })
+            except Exception as e:
+                return jsonify({
+                    'status': 'error',
+                    'message': str(e)
+                }), 500
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': 'No phone number provided'
+            }), 400
+    
+    return '''
+    <form method="POST">
+        <input type="text" name="phone_number" placeholder="Enter phone number" required>
+        <button type="submit">Test Validate</button>
+    </form>
+    '''
